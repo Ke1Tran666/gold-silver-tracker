@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Theo dõi giá vàng bạc realtime</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand-block">
+          <div class="brand-mark">Au</div>
+          <div>
+            <h1>Kim loại quý</h1>
+            <p>Vàng Việt Nam, bạc và giá thế giới</p>
+          </div>
+        </div>
+
+        <nav class="nav-list" aria-label="Bộ lọc nhanh">
+          <button class="nav-item active" data-view="all">Tổng quan</button>
+          <button class="nav-item" data-view="gold">Vàng Việt Nam</button>
+          <button class="nav-item" data-view="silver">Bạc</button>
+          <button class="nav-item" data-view="world">Thế giới</button>
+          <button class="nav-item" data-view="sources">Nguồn dữ liệu</button>
+        </nav>
+
+        <div class="status-panel">
+          <div class="status-row">
+            <span class="status-dot" id="liveDot"></span>
+            <span id="liveText">Đang kết nối</span>
+          </div>
+          <div class="muted" id="refreshMeta">Chưa có dữ liệu</div>
+          <button class="small-button" id="manualRefresh" type="button">Làm mới ngay</button>
+        </div>
+      </aside>
+
+      <main class="content">
+        <section class="topbar" aria-label="Thanh công cụ">
+          <div>
+            <h2>Bảng giá realtime</h2>
+            <p id="sourceSummary">Đang tải dữ liệu thị trường</p>
+          </div>
+          <div class="toolbar">
+            <label class="search-box">
+              <span>Tìm</span>
+              <input id="searchInput" type="search" placeholder="SJC, PNJ, Hà Nội, bạc...">
+            </label>
+            <a class="export-link" href="/api/export.xlsx">Xuất XLSX</a>
+          </div>
+        </section>
+
+        <section class="metric-grid" aria-label="Chỉ số chính">
+          <article class="metric-card">
+            <span>Vàng SJC bán ra</span>
+            <strong id="metricSjc">--</strong>
+            <small id="metricSjcSub">--</small>
+          </article>
+          <article class="metric-card">
+            <span>Vàng thế giới</span>
+            <strong id="metricGoldSpot">--</strong>
+            <small id="metricGoldSpotSub">--</small>
+          </article>
+          <article class="metric-card">
+            <span>Bạc quy đổi</span>
+            <strong id="metricSilver">--</strong>
+            <small id="metricSilverSub">--</small>
+          </article>
+          <article class="metric-card alert-card">
+            <span>Nguồn ổn định</span>
+            <strong id="metricSources">--</strong>
+            <small id="metricSourcesSub">--</small>
+          </article>
+        </section>
+
+        <section class="chart-section terminal-section" data-section="all gold silver world">
+          <div class="terminal-toolbar">
+            <div class="symbol-switcher" aria-label="Chọn mã biểu đồ">
+              <span class="search-icon">⌕</span>
+              <button type="button" class="symbol-button" data-chart-key="goldSpot">XAUUSD</button>
+              <button type="button" class="symbol-button" data-chart-key="sjcSell">SJC</button>
+              <button type="button" class="symbol-button" data-chart-key="silverSellLuong">SILVER</button>
+            </div>
+            <div class="timeframe-switcher" aria-label="Chọn khung thời gian">
+              <button type="button" data-timeframe="1m">1m</button>
+              <button type="button" data-timeframe="5m">5m</button>
+              <button type="button" data-timeframe="30m">30m</button>
+              <button type="button" data-timeframe="1h">1h</button>
+            </div>
+            <div class="terminal-tools">
+              <span class="tool-icon">╫</span>
+              <span class="tool-icon">▥</span>
+              <span class="tool-icon">▧</span>
+              <span>Các chỉ báo</span>
+            </div>
+          </div>
+
+          <div class="terminal-body">
+            <div class="terminal-chart-pane">
+              <div class="chart-titlebar">
+                <div>
+                  <h3 id="terminalTitle">XAUUSD</h3>
+                  <p id="terminalMeta">Vàng / Đô la Mỹ · 5 · dữ liệu realtime</p>
+                </div>
+                <div class="ohlc-strip" id="ohlcStrip"></div>
+              </div>
+              <canvas id="priceChart" width="1200" height="520" aria-label="Biểu đồ nến giá"></canvas>
+              <div class="range-tabs">
+                <button type="button" data-window-size="1d">1Ngày</button>
+                <button type="button" data-window-size="5d">5Ngày</button>
+                <button type="button" data-window-size="1m">1Tháng</button>
+                <button type="button" data-window-size="3m">3Tháng</button>
+                <button type="button" data-window-size="all">Tất cả</button>
+                <span id="terminalClock">--</span>
+              </div>
+            </div>
+
+            <aside class="quote-panel">
+              <div class="quote-head">
+                <h3 id="quoteSymbol">XAUUSD</h3>
+                <button type="button" aria-label="Theo dõi">▤</button>
+              </div>
+              <p id="quoteName">Vàng / Đô la Mỹ</p>
+              <strong id="quotePrice">--</strong>
+              <div class="quote-change" id="quoteChange">--</div>
+              <p class="quote-status" id="quoteStatus">Đang cập nhật</p>
+
+              <div class="quote-badges">
+                <span id="quoteBid">--</span>
+                <span id="quoteAsk">--</span>
+              </div>
+
+              <div class="range-meter">
+                <div class="range-label">
+                  <span id="dayLow">--</span>
+                  <b>PHẠM VI NGÀY</b>
+                  <span id="dayHigh">--</span>
+                </div>
+                <div class="meter-track"><i id="dayMarker"></i></div>
+              </div>
+
+              <div class="range-meter">
+                <div class="range-label">
+                  <span id="seriesLow">--</span>
+                  <b>PHẠM VI LỊCH SỬ</b>
+                  <span id="seriesHigh">--</span>
+                </div>
+                <div class="meter-track"><i id="seriesMarker"></i></div>
+              </div>
+
+              <div class="performance-block">
+                <h4>Hiệu suất</h4>
+                <div class="performance-grid" id="performanceGrid"></div>
+              </div>
+            </aside>
+          </div>
+          <div class="movement-grid hidden" id="movementGrid"></div>
+        </section>
+
+        <section class="filters" data-section="all gold silver world">
+          <label>
+            Thương hiệu
+            <select id="brandFilter"></select>
+          </label>
+          <label>
+            Khu vực
+            <select id="regionFilter"></select>
+          </label>
+          <label>
+            Sắp xếp
+            <select id="sortSelect">
+              <option value="brand">Thương hiệu</option>
+              <option value="sellDesc">Bán ra cao nhất</option>
+              <option value="sellAsc">Bán ra thấp nhất</option>
+              <option value="spreadAsc">Chênh lệch thấp nhất</option>
+            </select>
+          </label>
+        </section>
+
+        <section class="table-section" data-section="all gold">
+          <div class="section-header">
+            <div>
+              <h3>Vàng trong nước</h3>
+              <p id="goldCount">-- dòng</p>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Thương hiệu</th>
+                  <th>Khu vực</th>
+                  <th>Loại vàng</th>
+                  <th class="number">Mua vào</th>
+                  <th class="number">Bán ra</th>
+                  <th class="number">Chênh lệch</th>
+                  <th>Cập nhật</th>
+                </tr>
+              </thead>
+              <tbody id="goldTable"></tbody>
+            </table>
+          </div>
+          <div class="pagination-bar" id="goldPager"></div>
+        </section>
+
+        <section class="table-section" data-section="all silver">
+          <div class="section-header">
+            <div>
+              <h3>Bạc</h3>
+              <p id="silverCount">-- dòng</p>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nguồn</th>
+                  <th>Khu vực</th>
+                  <th>Sản phẩm</th>
+                  <th class="number">Mua</th>
+                  <th class="number">Bán</th>
+                  <th>Đơn vị</th>
+                  <th>Cập nhật</th>
+                </tr>
+              </thead>
+              <tbody id="silverTable"></tbody>
+            </table>
+          </div>
+          <div class="pagination-bar" id="silverPager"></div>
+        </section>
+
+        <section class="table-section" data-section="all world">
+          <div class="section-header">
+            <div>
+              <h3>Thế giới</h3>
+              <p id="worldCount">-- dòng</p>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Kim loại</th>
+                  <th>Mã</th>
+                  <th class="number">Giá cuối</th>
+                  <th class="number">Thay đổi</th>
+                  <th>Đơn vị</th>
+                  <th>Nguồn</th>
+                </tr>
+              </thead>
+              <tbody id="worldTable"></tbody>
+            </table>
+          </div>
+          <div class="pagination-bar" id="worldPager"></div>
+        </section>
+
+        <section class="table-section" data-section="all sources">
+          <div class="section-header">
+            <div>
+              <h3>Nguồn dữ liệu</h3>
+              <p id="sourceCount">-- nguồn</p>
+            </div>
+          </div>
+          <div id="errorBox" class="error-box hidden"></div>
+          <div class="source-grid" id="sourceGrid"></div>
+        </section>
+      </main>
+    </div>
+
+    <script src="/app.js?v=1.4.0" defer></script>
+  </body>
+</html>

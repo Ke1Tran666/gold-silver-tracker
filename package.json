@@ -1,0 +1,15 @@
+{
+  "name": "gold-silver-tracker-vn",
+  "version": "1.0.0",
+  "description": "Realtime dashboard theo doi gia vang va bac Viet Nam, kem gia the gioi.",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "once": "node server.js --once",
+    "check": "node --check server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
