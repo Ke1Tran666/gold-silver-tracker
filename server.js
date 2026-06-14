@@ -6,7 +6,7 @@ const path = require("node:path");
 const zlib = require("node:zlib");
 const { URL } = require("node:url");
 
-const HOST = process.env.HOST || "127.0.0.1";
+const HOST = process.env.HOST || "0.0.0.0";
 const PORT = Number(process.env.PORT || 4587);
 const POLL_INTERVAL_MS = Number(process.env.POLL_INTERVAL_MS || 60_000);
 const REQUEST_TIMEOUT_MS = Number(process.env.REQUEST_TIMEOUT_MS || 15_000);
